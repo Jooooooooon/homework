@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+
+    <title>릭앤모티와 함께 신나는 쇼핑</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Black Han Sans', sans-serif;
+        }
+
+        .wrap {
+            margin: 50px auto auto auto;
+            width: 600px;
+        }
+
+        .top {
+            /*background-color: green;*/
+            background-image: url("https://thetecheducation.com/wp-content/uploads/2020/04/rick-morty-feat-1.jpg");
+            width: 600px;
+            height: 250px;
+            background-position: center;
+            background-size: cover;
+            border-radius: 10px;
+        }
+
+        .mid {
+            padding-top: 15px;
+        }
+
+        .low {
+            padding-top: 20px;
+        }
+
+        .btn {
+            background-color: coral;
+            border-color: coral;
+            display: block;
+            margin: auto;
+        }
+
+        .fontcolor {
+            color: darkblue;
+        }
+
+    </style>
+
+    <script>
+
+        $(document).ready(function () {
+            $.ajax({
+                type: "GET",
+                url: "https://api.manana.kr/exchange/rate.json",
+                data: {},
+                success: function (response) {
+                    let rate = response[1]['rate']
+                    let temp_html = `${rate}`
+                    $('#rate').append(temp_html)
+                }
+            })
+
+        });
+
+        function isCellPhone(p) {
+            let regExp = /^(01[016789]{1}|02|0[3-9]{1}[0-9]{1})[-][0-9]{3,4}[-][0-9]{4}$/;
+            return regExp.test(p);
+        }
+
+        function ord() {
+            let name = $('#name').val();
+            let quantity = $('#inputGroupSelect01').val();
+            let address = $('#address').val();
+            let phone = $('#phone').val();
+            if (name == "") {
+                alert('이름을 적어주세요!')
+                $("#name").focus()
+            } else if (quantity == 0) {
+                alert('수량을 선택해줘요!')
+                $("#inputGroupSelect01").focus()
+            } else if (address == '') {
+                alert('주소를 적어주세요!')
+                $("#address").focus()
+            } else if (phone == "") {
+                alert('전화번호가 뭐에요?')
+                $("#phone").focus()
+            } else if (!isCellPhone(phone)) {
+                alert('휴대폰번호 형식이 틀렸어요. \n010-XXXX-XXXX로 입력해주세요!')
+            } else {
+                let name = $('#name').val();
+                let count = $('#inputGroupSelect01').val();
+                let address = $('#address').val();
+                let phone = $('#phone').val();
+
+                $.ajax({
+                    type: "POST",
+                    url: "/order",
+                    data: {name_give: name, count_give: count, address_give: address, phone_give: phone},
+                    success: function (response) { // 성공하면
+                        if (response["result"] == "success") {
+                            alert(response["msg"]);
+                            window.location.reload();
+                        }
+                    }
+                })
+            }
+        }
+
+        $("#orders-box").html("");
+        showOrders();
+
+        function showOrders() {
+            $.ajax({
+                type: "GET",
+                url: "/order",
+                data: {},
+                success: function (response) {
+                    if (response["result"] == "success") {
+                        let orders = response['orders']
+                        for (let i = 0; i < orders.length; i++) {
+                            let name = orders[i]['name'];
+                            let count = orders[i]['count'];
+                            let address = orders[i]['address'];
+                            let phone = orders[i]['phone'];
+
+                            makeOrder(name, count, address, phone)
+                        }
+                    }
+                }
+            })
+        }
+
+        function makeOrder(name, count, address, phone) {
+
+            let temp_html = `<tr>
+                                <th scope="row">${name}</th>
+                                <td>${count}</td>
+                                <td>${address}</td>
+                                <td>${phone}</td>
+                            </tr>`
+
+            $('#orders-box').append(temp_html)
+
+        }
+
+
+    </script>
+
+</head>
+
+<body>
+<div class="wrap">
+
+    <div class="top">
+    </div>
+    <div class="mid">
+        <h2>
+            Portal Gun 절찬리 판매중! <br> <span style="font-size: 25px; color: coral">1개 단돈 1,000,000원</span>
+        </h2>
+        포털 건만 있으면 우주의 모든 차원을 넘나들 수 있습니다. <br> 가조피안 종족이 지배하는 C-137 행성으로 휴가를 떠나보세요.
+
+    </div>
+
+    <div id="rate" class="fontcolor mid">
+        달러-원 환율은?
+    </div>
+
+    <div class="input-group mb-3 low">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">주문자 이름</span>
+        </div>
+        <input id="name" type="text" class="form-control" aria-label="Default"
+               aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <label class="input-group-text" for="inputGroupSelect01">수량</label>
+        </div>
+        <select class="custom-select" id="inputGroupSelect01">
+            <option value="0" selected>수량을 선택하세요</option>
+            <option value="1">1개</option>
+            <option value="2">2개</option>
+            <option value="3">3개</option>
+        </select>
+    </div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">주소</span>
+        </div>
+        <input id="address" type="text" class="form-control" aria-label="Default"
+               aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">전화번호</span>
+        </div>
+        <input id="phone" type="text" class="form-control" aria-label="Default"
+               aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <button onclick="ord()" type="button" class="btn btn-primary">주문하기</button>
+
+</div>
+
+<div class="wrap">
+    <table class="table">
+        <thead class="thead-dark">
+        <tr>
+            <th scope="col">이름</th>
+            <th scope="col">수량</th>
+            <th scope="col">주소</th>
+            <th scope="col">전화번호</th>
+        </tr>
+        </thead>
+        <tbody id="orders-box">
+
+        </tbody>
+    </table>
+</div>
+
+</body>
+
+</html>
